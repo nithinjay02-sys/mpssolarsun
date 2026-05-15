@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Services — MPS Solar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+:root{
+  --white:#ffffff;
+  --bg:#f8f9fb;
+  --navy:#0c1f3d;
+  --navy2:#1a3560;
+  --orange:#f47c20;
+  --orange2:#d9650c;
+  --orange-pale:#fff4eb;
+  --border:#dce4ef;
+  --text:#3b4f68;
+  --text-light:#7a8fa8;
+  --sky:#e8f4fd;
+  --font:'Sora',sans-serif;
+  --font-serif:'DM Serif Display',serif;
+  --nav-h:68px;
+}
+
+body{
+  background:var(--white);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:16px;
+  line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  cursor:none;
+}
+
+/* ── SUN CURSOR ── */
+#sun-cursor{
+  position:fixed;pointer-events:none;z-index:99999;
+  top:0;left:0;width:36px;height:36px;
+  transform:translate(-50%,-50%);will-change:left,top;
+  opacity:0;transition:width .25s,height .25s,opacity .3s;
+}
+#sun-cursor svg{width:100%;height:100%;animation:sunSpin 8s linear infinite;filter:drop-shadow(0 0 6px rgba(244,124,32,.55))}
+body.cursor-grow #sun-cursor{width:52px;height:52px}
+body.cursor-dark #sun-cursor svg{filter:drop-shadow(0 0 8px rgba(255,200,80,.75))}
+@keyframes sunSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@media(pointer:coarse){#sun-cursor{display:none}body{cursor:auto}}
+
+/* ── UTILITIES ── */
+.container{width:100%;max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem)}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+.eyebrow{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--orange);margin-bottom:.9rem}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:none}
+.btn-orange{font-size:13.5px;font-weight:600;color:#fff;background:var(--orange);padding:.7rem 1.6rem;border-radius:7px;transition:background .2s,transform .15s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-orange:hover{background:var(--orange2);transform:translateY(-1px)}
+.btn-outline-navy{font-size:13.5px;font-weight:500;color:var(--navy);border:1.5px solid var(--border);padding:.7rem 1.6rem;border-radius:7px;transition:border-color .2s,background .2s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-outline-navy:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-pale)}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;height:var(--nav-h);background:rgba(255,255,255,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(10px);display:flex;align-items:center}
+.nav-wrap{width:100%;max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem);display:flex;align-items:center;justify-content:space-between;gap:2rem}
+.nav-logo{font-size:1.35rem;font-weight:700;letter-spacing:.03em;color:var(--navy);flex-shrink:0}
+.nav-logo span{color:var(--orange)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:13.5px;font-weight:400;color:var(--text);transition:color .2s;white-space:nowrap}
+.nav-links a:hover,.nav-links a.active{color:var(--orange)}
+.nav-cta{font-size:13px;font-weight:600;color:#fff;background:var(--orange);padding:.55rem 1.35rem;border-radius:6px;transition:background .2s;white-space:nowrap;flex-shrink:0}
+.nav-cta:hover{background:var(--orange2)}
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;z-index:10}
+.nav-ham span{display:block;width:22px;height:1.5px;background:var(--navy);border-radius:2px;transition:transform .3s,opacity .3s}
+.nav-ham.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.nav-ham.open span:nth-child(2){opacity:0}
+.nav-ham.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.mob-nav{display:none;position:fixed;inset:0;z-index:400;background:var(--white);flex-direction:column;align-items:center;justify-content:center;gap:2.25rem}
+.mob-nav.open{display:flex}
+.mob-nav a{font-size:clamp(1.4rem,5vw,2rem);font-weight:500;color:var(--navy);transition:color .2s}
+.mob-nav a:hover{color:var(--orange)}
+.mob-nav .mob-cta{font-size:1rem;font-weight:600;color:#fff;background:var(--orange);padding:.75rem 2.25rem;border-radius:8px;margin-top:.5rem}
+
+/* ── PAGE HERO ── */
+#page-hero{
+  padding-top:var(--nav-h);
+  background:linear-gradient(140deg,var(--navy) 0%,var(--navy2) 60%,#1e4d9a 100%);
+  position:relative;overflow:hidden;
+  min-height:420px;display:flex;align-items:center;
+}
+#page-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.05) 1px,transparent 1px);background-size:32px 32px}
+#page-hero::after{content:'';position:absolute;right:-10vw;top:-20vh;width:55vw;height:55vw;border-radius:50%;background:radial-gradient(circle,rgba(244,124,32,.18) 0%,transparent 65%);pointer-events:none}
+.hero-content{position:relative;z-index:2;padding:clamp(3rem,6vh,5rem) clamp(1.25rem,5vw,2.5rem);max-width:1160px;margin:0 auto;width:100%}
+.hero-content .eyebrow{color:rgba(255,255,255,.5)}
+.hero-content h1{font-size:clamp(2.2rem,5vw,4rem);font-weight:700;color:#fff;line-height:1.1;letter-spacing:-.02em;margin-bottom:1rem}
+.hero-content h1 em{font-style:normal;color:var(--orange)}
+.hero-content p{font-size:clamp(.95rem,1.5vw,1.1rem);font-weight:400;color:rgba(255,255,255,.65);max-width:560px;line-height:1.75;margin-bottom:2rem}
+.hero-btns{display:flex;gap:.875rem;flex-wrap:wrap}
+
+/* ── SERVICE NAV PILLS ── */
+#svc-nav{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:var(--nav-h);z-index:200;
+}
+.svc-nav-inner{
+  max-width:1160px;margin:0 auto;
+  padding:0 clamp(1.25rem,5vw,2.5rem);
+  display:flex;gap:0;overflow-x:auto;scrollbar-width:none;
+}
+.svc-nav-inner::-webkit-scrollbar{display:none}
+.svc-pill{
+  flex-shrink:0;
+  font-size:12.5px;font-weight:500;color:var(--text-light);
+  padding:1rem 1.25rem;border-bottom:2px solid transparent;
+  transition:color .2s,border-color .2s;white-space:nowrap;
+  display:flex;align-items:center;gap:.4rem;
+}
+.svc-pill:hover{color:var(--orange)}
+.svc-pill.active{color:var(--orange);border-color:var(--orange);font-weight:600}
+.svc-pill .pill-num{font-size:10px;background:var(--bg);color:var(--text-light);border-radius:4px;padding:.1rem .4rem;font-weight:600}
+.svc-pill.active .pill-num{background:var(--orange-pale);color:var(--orange)}
+
+/* ── SERVICE SECTIONS ── */
+.svc-section{
+  padding:clamp(4rem,8vh,6.5rem) 0;
+  border-bottom:1px solid var(--border);
+}
+.svc-section:nth-child(even){background:var(--bg)}
+.svc-section:nth-child(odd){background:var(--white)}
+
+.svc-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(2.5rem,5vw,5rem);align-items:start;
+}
+.svc-grid.flip .svc-img-col{order:2}
+.svc-grid.flip .svc-text-col{order:1}
+
+/* Image column */
+.svc-img-col{}
+.svc-main-img{border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(12,31,61,.1);margin-bottom:1.25rem}
+.svc-main-img img{width:100%;height:380px;object-fit:cover;transition:transform .55s ease;display:block}
+.svc-main-img:hover img{transform:scale(1.03)}
+/* mini stat cards below image */
+.svc-img-stats{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+.img-stat{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;border-left:3px solid var(--orange)}
+.img-stat-val{font-size:1.3rem;font-weight:700;color:var(--navy);line-height:1}
+.img-stat-lbl{font-size:.75rem;font-weight:400;color:var(--text-light);margin-top:.2rem;line-height:1.4}
+
+/* Text column */
+.svc-text-col{}
+.svc-number{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text-light);margin-bottom:.6rem}
+.svc-text-col h2{font-size:clamp(1.5rem,2.5vw,2.1rem);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.015em;margin-bottom:1.1rem}
+.svc-text-col > p{font-size:clamp(.875rem,1.3vw,.975rem);font-weight:400;color:var(--text);line-height:1.8;margin-bottom:1rem}
+.svc-text-col > p:last-of-type{margin-bottom:1.5rem}
+
+/* Bullet list — OpenSolar-style */
+.svc-bullets{
+  background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:1.35rem 1.5rem;margin-bottom:1.75rem;
+  display:flex;flex-direction:column;gap:.6rem;
+}
+.svc-bullets li{
+  display:flex;align-items:flex-start;gap:.65rem;
+  font-size:.875rem;font-weight:400;color:var(--text);line-height:1.6;
+  list-style:none;
+}
+.svc-bullets li::before{
+  content:'';flex-shrink:0;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--orange-pale);border:1.5px solid var(--orange);
+  margin-top:.22rem;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpolyline points='3 8 6.5 11.5 13 5' stroke='%23f47c20' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-size:contain;border:none;
+}
+.svc-cta{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+
+/* ── PARTNERS ── */
+#partners{padding:clamp(3.5rem,6vh,5rem) 0;background:var(--navy)}
+.partners-head{text-align:center;margin-bottom:2.5rem}
+.partners-head .eyebrow{color:rgba(255,255,255,.4)}
+.partners-head h2{font-size:clamp(1.35rem,2.5vw,1.9rem);font-weight:600;color:#fff;letter-spacing:-.01em}
+.partners-grid{
+  display:flex;flex-wrap:wrap;
+  justify-content:center;align-items:center;
+  gap:1.25rem 2rem;
+  max-width:900px;margin:0 auto;
+}
+.partner-logo{
+  background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+  border-radius:10px;padding:.875rem 1.5rem;
+  display:flex;align-items:center;justify-content:center;
+  height:64px;min-width:110px;
+  transition:background .2s,transform .2s;
+}
+.partner-logo:hover{background:rgba(255,255,255,.14);transform:translateY(-2px)}
+.partner-logo img{max-height:36px;max-width:90px;object-fit:contain;filter:brightness(0) invert(1);opacity:.7;transition:opacity .2s}
+.partner-logo:hover img{opacity:1}
+
+/* ── WHY MPS STRIP ── */
+#why-strip{
+  background:var(--white);
+  padding:clamp(3.5rem,6vh,5rem) 0;
+  border-bottom:1px solid var(--border);
+}
+.why-strip-inner{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1.25rem;max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem)}
+.why-card{
+  background:var(--bg);border:1px solid var(--border);border-radius:12px;
+  padding:1.5rem 1.35rem;text-align:center;
+  transition:transform .25s,box-shadow .25s;
+}
+.why-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(12,31,61,.08)}
+.why-card-icon{width:44px;height:44px;border-radius:10px;background:var(--orange-pale);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center}
+.why-card-icon svg{width:22px;height:22px;fill:none;stroke:var(--orange);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.why-card h3{font-size:.95rem;font-weight:600;color:var(--navy);margin-bottom:.4rem;line-height:1.3}
+.why-card p{font-size:.8rem;font-weight:400;color:var(--text-light);line-height:1.6}
+
+/* ── CTA ── */
+#page-cta{
+  padding:clamp(4rem,7vh,6rem) 0;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+  position:relative;overflow:hidden;
+}
+#page-cta::before{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);background-size:28px 28px}
+.cta-inner{position:relative;z-index:1;text-align:center;max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem)}
+.cta-inner .eyebrow{color:rgba(255,255,255,.45)}
+.cta-inner h2{font-size:clamp(1.75rem,3.5vw,2.75rem);font-weight:700;color:#fff;line-height:1.15;letter-spacing:-.015em;margin-bottom:.875rem}
+.cta-inner p{font-size:clamp(.9rem,1.4vw,1.05rem);color:rgba(255,255,255,.65);max-width:480px;margin:0 auto 2rem;line-height:1.75}
+.cta-btns{display:flex;gap:.875rem;justify-content:center;flex-wrap:wrap}
+.btn-white{font-size:14px;font-weight:600;color:var(--orange);background:#fff;padding:.85rem 2rem;border-radius:7px;transition:transform .15s,box-shadow .15s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.btn-wline{font-size:14px;font-weight:500;color:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.25);padding:.85rem 2rem;border-radius:7px;transition:border-color .2s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-wline:hover{border-color:rgba(255,255,255,.65)}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);padding:clamp(3rem,5vh,4.5rem) 0 1.75rem}
+.foot-top{display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem);margin-bottom:2.5rem}
+.foot-brand h3{font-size:1.25rem;font-weight:700;color:#fff;letter-spacing:.03em;margin-bottom:.7rem}
+.foot-brand h3 span{color:var(--orange)}
+.foot-brand p{font-size:.85rem;color:rgba(255,255,255,.45);line-height:1.75;max-width:270px}
+.foot-col h4{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1.1rem}
+.foot-col ul{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.foot-col a{font-size:.855rem;color:rgba(255,255,255,.55);transition:color .2s}
+.foot-col a:hover{color:var(--orange)}
+.foot-bottom{max-width:1160px;margin:0 auto;padding:1.5rem clamp(1.25rem,5vw,2.5rem) 0;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.foot-copy{font-size:.78rem;color:rgba(255,255,255,.28)}
+.foot-legal{display:flex;gap:1.5rem;flex-wrap:wrap}
+.foot-legal a{font-size:.78rem;color:rgba(255,255,255,.28);transition:color .2s}
+.foot-legal a:hover{color:rgba(255,255,255,.7)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .svc-grid,.svc-grid.flip .svc-img-col,.svc-grid.flip .svc-text-col{order:unset}
+  .svc-grid{grid-template-columns:1fr}
+  .svc-main-img img{height:280px}
+  .why-strip-inner{grid-template-columns:repeat(2,1fr)}
+  .foot-top{grid-template-columns:1fr 1fr}
+}
+@media(max-width:900px){
+  :root{--nav-h:60px}
+  .nav-links,.nav-cta{display:none}
+  .nav-ham{display:flex}
+  .svc-nav-inner{padding:0 1.25rem}
+  .why-strip-inner{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  :root{--nav-h:56px}
+  #svc-nav{top:var(--nav-h)}
+  .svc-img-stats{grid-template-columns:1fr 1fr}
+  .why-strip-inner{grid-template-columns:1fr 1fr}
+  .foot-top{grid-template-columns:1fr;gap:2rem}
+  .foot-bottom{flex-direction:column;align-items:flex-start}
+  .cta-btns,.hero-btns{flex-direction:column;align-items:center}
+  .btn-orange,.btn-outline-navy,.btn-white,.btn-wline{width:100%;justify-content:center}
+  .svc-main-img img{height:220px}
+}
+</style>
+</head>
+<body>
+
+<!-- SUN CURSOR -->
+<div id="sun-cursor" aria-hidden="true">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#f47c20" stroke-linecap="round">
+      <line x1="50" y1="4"  x2="50" y2="16" stroke-width="5"/>
+      <line x1="50" y1="84" x2="50" y2="96" stroke-width="5"/>
+      <line x1="4"  y1="50" x2="16" y2="50" stroke-width="5"/>
+      <line x1="84" y1="50" x2="96" y2="50" stroke-width="5"/>
+      <line x1="18" y1="18" x2="26" y2="26" stroke-width="4"/>
+      <line x1="74" y1="74" x2="82" y2="82" stroke-width="4"/>
+      <line x1="82" y1="18" x2="74" y2="26" stroke-width="4"/>
+      <line x1="26" y1="74" x2="18" y2="82" stroke-width="4"/>
+    </g>
+    <circle cx="50" cy="50" r="22" fill="#f47c20"/>
+    <circle cx="43" cy="43" r="7" fill="rgba(255,255,255,0.25)"/>
+  </svg>
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mob-nav" id="mobNav">
+  <a href="mps-solar-redesign.html" onclick="cM()">Home</a>
+  <a href="#s1" onclick="cM()">Design</a>
+  <a href="#s2" onclick="cM()">BESS</a>
+  <a href="#s3" onclick="cM()">Technical Docs</a>
+  <a href="#s4" onclick="cM()">Installation</a>
+  <a href="#s5" onclick="cM()">O&amp;M</a>
+  <a href="#s6" onclick="cM()">BOS Supply</a>
+  <a href="https://mpssolar.com/contact/" class="mob-cta" onclick="cM()">Start a Project</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-wrap">
+    <a class="nav-logo" href="mps-solar-redesign.html">MPS<span>SOLAR</span></a>
+    <ul class="nav-links">
+      <li><a href="mps-solar-redesign.html">Home</a></li>
+      <li><a href="#" class="active">Services</a></li>
+      <li><a href="mps-solar-redesign.html#why">About</a></li>
+      <li><a href="mps-solar-redesign.html#testimonials">Reviews</a></li>
+      <li><a href="https://mpssolar.com/contact/">Contact</a></li>
+    </ul>
+    <a class="nav-cta" href="https://mpssolar.com/contact/">Start a Project</a>
+    <button class="nav-ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<section id="page-hero">
+  <div class="hero-content">
+    <div class="eyebrow">What we do</div>
+    <h1>Solar Engineering<br/>Services built for <em>every era</em></h1>
+    <p>From rooftop design to utility-scale BESS, from detailed technical documentation to long-term O&amp;M — MPS Solar delivers end-to-end engineering precision across the full solar lifecycle.</p>
+    <div class="hero-btns">
+      <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+      <a class="btn-outline-navy" href="#s1" style="color:rgba(255,255,255,.75);border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.06)">Explore Services ↓</a>
+    </div>
+  </div>
+</section>
+
+<!-- STICKY SERVICE NAV -->
+<div id="svc-nav">
+  <div class="svc-nav-inner">
+    <a class="svc-pill" href="#s1"><span class="pill-num">01</span>Design &amp; Engineering</a>
+    <a class="svc-pill" href="#s2"><span class="pill-num">02</span>BESS</a>
+    <a class="svc-pill" href="#s3"><span class="pill-num">03</span>Technical Docs</a>
+    <a class="svc-pill" href="#s4"><span class="pill-num">04</span>Installation</a>
+    <a class="svc-pill" href="#s5"><span class="pill-num">05</span>O&amp;M</a>
+    <a class="svc-pill" href="#s6"><span class="pill-num">06</span>BOS Supply</a>
+  </div>
+</div>
+
+<!-- ══════════ SERVICE 01 ══════════ -->
+<section class="svc-section" id="s1">
+  <div class="container">
+    <div class="svc-grid reveal">
+
+      <div class="svc-img-col">
+        <div class="svc-main-img">
+          <img src="https://mpssolar.com/wp-content/uploads/2025/05/pexels-photo-4977409-4977409.jpg" alt="Solar Design and Engineering" loading="lazy"/>
+        </div>
+        <div class="svc-img-stats">
+          <div class="img-stat">
+            <div class="img-stat-val">100 kW<span style="font-size:.75em;color:var(--orange)">–</span>100 MW</div>
+            <div class="img-stat-lbl">Project scale range</div>
+          </div>
+          <div class="img-stat">
+            <div class="img-stat-val">All types</div>
+            <div class="img-stat-lbl">Rooftop, ground-mount, floating, carport</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svc-text-col">
+        <div class="svc-number">Service 01</div>
+        <div class="eyebrow">Design &amp; Engineering</div>
+        <h2>Precision engineering from first sketch to final circuit</h2>
+        <p>At MPS, we engineer every solar project with precision from the first layout sketch to the last circuit breaker. Our multi-disciplinary design team covers all aspects of solar plant engineering, ensuring seamless execution and long-term performance.</p>
+        <p>We begin with an optimised plant layout, accounting for land contours, shadow analysis, and yield maximisation — then deep-dive into electrical and structural design, balancing performance, safety, and cost.</p>
+        <ul class="svc-bullets">
+          <li>Detailed voltage drop analysis and optimised cable sizing for AC and DC systems</li>
+          <li>Protection system design including breaker sizing and fault current calculations</li>
+          <li>Structure design validation: wind loads, soil characteristics, and stability checks</li>
+          <li>Preparation of GA drawings, SLDs, and construction-ready documentation</li>
+          <li>Shadow analysis, yield maximisation, and optimised plant layout</li>
+          <li>Standards-compliant, site-specific solutions — from 100 kW rooftop to 100 MW park</li>
+        </ul>
+        <div class="svc-cta">
+          <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+          <a class="btn-outline-navy" href="#s2">Next: BESS →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICE 02 ══════════ -->
+<section class="svc-section" id="s2">
+  <div class="container">
+    <div class="svc-grid flip reveal">
+
+      <div class="svc-img-col">
+        <div class="svc-main-img">
+          <img src="https://mpssolar.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-19-at-5.02.04-PM-768x512.webp" alt="Battery Energy Storage Systems" loading="lazy"/>
+        </div>
+        <div class="svc-img-stats">
+          <div class="img-stat">
+            <div class="img-stat-val">AC + DC</div>
+            <div class="img-stat-lbl">Coupling strategies supported</div>
+          </div>
+          <div class="img-stat">
+            <div class="img-stat-val">Multi-use</div>
+            <div class="img-stat-lbl">Peak shaving, backup, frequency regulation, solar smoothing</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svc-text-col">
+        <div class="svc-number">Service 02</div>
+        <div class="eyebrow">Battery Energy Storage Systems</div>
+        <h2>Complete BESS design and engineering — from sizing to commissioning</h2>
+        <p>We provide complete design and engineering services for BESS, tailored to support grid stability, load shifting, and renewable integration. Our team handles every technical aspect from energy sizing and application mapping to system architecture and control strategy.</p>
+        <p>We evaluate use cases like peak shaving, backup, frequency regulation, and solar smoothing — and design for both AC and DC coupled systems, hybrid microgrids, and standalone storage projects.</p>
+        <ul class="svc-bullets">
+          <li>Load and autonomy calculations for accurate system sizing</li>
+          <li>Battery sizing based on C-rating and daily cycle requirements</li>
+          <li>System voltage and inverter matching for optimal efficiency</li>
+          <li>Protection design including fuse and breaker coordination</li>
+          <li>Integration with solar PV and diesel gensets in hybrid setups</li>
+          <li>Fully compliant with international standards across multiple chemistries and control platforms</li>
+        </ul>
+        <div class="svc-cta">
+          <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+          <a class="btn-outline-navy" href="#s3">Next: Technical Docs →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICE 03 ══════════ -->
+<section class="svc-section" id="s3">
+  <div class="container">
+    <div class="svc-grid reveal">
+
+      <div class="svc-img-col">
+        <div class="svc-main-img">
+          <img src="https://mpssolar.com/wp-content/uploads/2025/05/pexels-photo-5816283-5816283-768x1152.jpg" alt="Technical Documentation and Tender Support" loading="lazy"/>
+        </div>
+        <div class="svc-img-stats">
+          <div class="img-stat">
+            <div class="img-stat-val">Global</div>
+            <div class="img-stat-lbl">India, Australia, Middle East, Africa</div>
+          </div>
+          <div class="img-stat">
+            <div class="img-stat-val">Full scope</div>
+            <div class="img-stat-lbl">From feasibility to EPC selection</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svc-text-col">
+        <div class="svc-number">Service 03</div>
+        <div class="eyebrow">Technical Documentation &amp; Tender Support</div>
+        <h2>Professionally packaged tenders — technically sound, procurement-ready</h2>
+        <p>MPS provides comprehensive technical documentation services that support solar projects from feasibility to final EPC selection. Our work enables clients to float professional, technically sound tenders and make informed procurement decisions.</p>
+        <p>Whether you're an asset owner, consultant, or government body, we help define the scope clearly, align with local standards, and build a competitive, technically viable package.</p>
+        <ul class="svc-bullets">
+          <li>Detailed Bill of Materials (BOM) and equipment schedules</li>
+          <li>Single Line Diagrams (SLDs), General Arrangement (GA), and layout drawings</li>
+          <li>Design basis reports, performance simulations, and preliminary yield forecasts</li>
+          <li>Site-specific technical feasibility reports and grid compliance studies</li>
+          <li>Tender documents: Scope of Work, Performance Guarantees, and Evaluation Criteria</li>
+          <li>EPC filtering support — technical clarifications, scoring matrix, and bid comparisons</li>
+        </ul>
+        <div class="svc-cta">
+          <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+          <a class="btn-outline-navy" href="#s4">Next: Installation →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICE 04 ══════════ -->
+<section class="svc-section" id="s4">
+  <div class="container">
+    <div class="svc-grid flip reveal">
+
+      <div class="svc-img-col">
+        <div class="svc-main-img">
+          <img src="https://mpssolar.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-21-at-5.10.29-PM-768x512.jpeg" alt="Installation and Commissioning Support" loading="lazy"/>
+        </div>
+        <div class="svc-img-stats">
+          <div class="img-stat">
+            <div class="img-stat-val">Turnkey</div>
+            <div class="img-stat-lbl">Unloading to energisation support</div>
+          </div>
+          <div class="img-stat">
+            <div class="img-stat-val">All scales</div>
+            <div class="img-stat-lbl">Rooftop to utility-scale ground-mount</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svc-text-col">
+        <div class="svc-number">Service 04</div>
+        <div class="eyebrow">Installation &amp; Commissioning Support</div>
+        <h2>On-ground expertise — built right, built to last</h2>
+        <p>MPS provides on-ground support for installation and commissioning of solar power systems, tailored to the needs of each client and project. Whether acting as a turnkey execution partner or offering dedicated commissioning support, we deploy highly skilled engineers, supervisors, and technical specialists.</p>
+        <p>Our support model adapts to the project — from full-scope EPC execution to last-mile commissioning assistance across varied geographies.</p>
+        <ul class="svc-bullets">
+          <li>Deployment of site engineers and supervisors for installation oversight</li>
+          <li>Turnkey execution of small to mid-scale projects — unloading to energisation</li>
+          <li>Pre-commissioning checks and inverter/grid compliance validations</li>
+          <li>SCADA, protection system, and communication setup</li>
+          <li>Coordination with DISCOMs, CEIG, and grid authorities for approvals</li>
+          <li>Performance testing, quality audits, and handover documentation</li>
+        </ul>
+        <div class="svc-cta">
+          <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+          <a class="btn-outline-navy" href="#s5">Next: O&amp;M →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICE 05 ══════════ -->
+<section class="svc-section" id="s5">
+  <div class="container">
+    <div class="svc-grid reveal">
+
+      <div class="svc-img-col">
+        <div class="svc-main-img">
+          <img src="https://mpssolar.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-19-at-7.08.46-PM-768x768.webp" alt="O&M Reporting and Predictive Maintenance" loading="lazy"/>
+        </div>
+        <div class="svc-img-stats">
+          <div class="img-stat">
+            <div class="img-stat-val">Real-time</div>
+            <div class="img-stat-lbl">Monitoring across multiple time zones</div>
+          </div>
+          <div class="img-stat">
+            <div class="img-stat-val">Predictive</div>
+            <div class="img-stat-lbl">IV curve analysis &amp; weather correlation</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svc-text-col">
+        <div class="svc-number">Service 05</div>
+        <div class="eyebrow">O&amp;M, Reporting &amp; Predictive Maintenance</div>
+        <h2>Intelligent O&amp;M — keeping your plant at peak every hour, every day</h2>
+        <p>MPS offers intelligent Operations &amp; Maintenance solutions that go beyond routine inspections and cleaning. Our approach integrates real-time monitoring, data-driven performance analysis, and predictive maintenance — ensuring issues are identified and resolved before they impact generation.</p>
+        <p>We maintain solar assets across utility, commercial, and industrial segments, with remote teams managing plants across multiple time zones.</p>
+        <ul class="svc-bullets">
+          <li>Preventive maintenance plans based on OEM standards and site conditions</li>
+          <li>Daily, monthly, and annual performance reporting with KPI tracking</li>
+          <li>Predictive diagnostics: inverter-level data, IV curve analysis, and weather correlation</li>
+          <li>Root cause analysis for underperformance and technical losses</li>
+          <li>Cleaning schedules, vegetation control, and physical inspections</li>
+          <li>In-house SCADA analysis, string-level tracking, and event response</li>
+          <li>Warranty claim coordination, spares inventory management, and ticketing</li>
+        </ul>
+        <div class="svc-cta">
+          <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+          <a class="btn-outline-navy" href="#s6">Next: BOS Supply →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SERVICE 06 ══════════ -->
+<section class="svc-section" id="s6">
+  <div class="container">
+    <div class="svc-grid flip reveal">
+
+      <div class="svc-img-col">
+        <div class="svc-main-img">
+          <img src="https://mpssolar.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-21-at-5.28.06-PM-768x512.jpeg" alt="Balance of System BOS Supply" loading="lazy"/>
+        </div>
+        <div class="svc-img-stats">
+          <div class="img-stat">
+            <div class="img-stat-val">Certified</div>
+            <div class="img-stat-lbl">Global manufacturers &amp; suppliers</div>
+          </div>
+          <div class="img-stat">
+            <div class="img-stat-val">Integrated</div>
+            <div class="img-stat-lbl">Spec-to-spec matching with our design team</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="svc-text-col">
+        <div class="svc-number">Service 06</div>
+        <div class="eyebrow">Balance of System (BOS) Supply</div>
+        <h2>Quality-assured BOS supply — every component, on spec, on time</h2>
+        <p>In addition to engineering and project execution, MPS offers reliable and timely Balance of System supply to support seamless solar plant construction. We partner with certified manufacturers and global suppliers to deliver high-quality components meeting both performance and compliance standards across geographies.</p>
+        <p>Our BOS supply is fully integrated with our design team, ensuring engineering compatibility and cost control at every step.</p>
+        <ul class="svc-bullets">
+          <li>DC Cables, AC Cables, Earthing &amp; Communication Cables</li>
+          <li>DCDBs, ACDBs, AJBs, and LT Panels custom-built to project specs</li>
+          <li>MC4 connectors, cable trays, and junction boxes</li>
+          <li>Module mounting structures — HDG, pre-galvanised, or aluminium</li>
+          <li>Inverter stations, combiner boxes, and surge protection devices</li>
+          <li>Transformers, isolators, RMUs, and other grid-interface components</li>
+          <li>SCADA enclosures, weather stations, and instrumentation</li>
+        </ul>
+        <div class="svc-cta">
+          <a class="btn-orange" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+          <a class="btn-outline-navy" href="#s1">↑ Back to top</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PARTNERS -->
+<section id="partners">
+  <div class="container">
+    <div class="partners-head reveal">
+      <div class="eyebrow">Trusted brands we work with</div>
+      <h2>Our Technology Partners</h2>
+    </div>
+    <div class="partners-grid reveal" style="transition-delay:.1s">
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/sma.jpeg" alt="SMA"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/Sungrow-Logo-FINAL-scaled.jpeg" alt="Sungrow"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/huawei-1-150x150.jpeg" alt="Huawei"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/l-and-t-switchgears-500x500-1.webp" alt="L&T Switchgear"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/staubli-logo.png" alt="Stäubli"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/abb.png" alt="ABB"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/longi.png" alt="LONGi"/></div>
+      <div class="partner-logo"><img src="https://mpssolar.com/wp-content/uploads/2025/05/seimens.png" alt="Siemens"/></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY MPS STRIP -->
+<section id="why-strip">
+  <div class="container" style="margin-bottom:2rem;text-align:center">
+    <div class="eyebrow reveal">Why choose MPS Solar</div>
+    <h2 class="reveal" style="font-size:clamp(1.5rem,2.8vw,2.2rem);font-weight:700;color:var(--navy);letter-spacing:-.015em;margin-bottom:.5rem">The best technical team — already working for you.</h2>
+    <p class="reveal" style="color:var(--text);font-size:.975rem;max-width:540px;margin:0 auto">Our engineers, analysts, and project leads are globally trained, multi-disciplinary experts who bring unmatched precision, innovation, and practical execution to every project.</p>
+  </div>
+  <div class="why-strip-inner">
+    <div class="why-card reveal">
+      <div class="why-card-icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>10 Years' Experience</h3>
+      <p>A decade of electrical and solar engineering expertise across every project scale and geography.</p>
+    </div>
+    <div class="why-card reveal" style="transition-delay:.08s">
+      <div class="why-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg>
+      </div>
+      <h3>5-Star Rated</h3>
+      <p>Consistently top-rated by EPCs, investors, and installers across four continents for quality and reliability.</p>
+    </div>
+    <div class="why-card reveal" style="transition-delay:.16s">
+      <div class="why-card-icon">
+        <svg viewBox="0 0 24 24"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      </div>
+      <h3>Quick Turnaround</h3>
+      <p>Fast, accurate deliverables without cutting corners — because your project timeline matters to us.</p>
+    </div>
+    <div class="why-card reveal" style="transition-delay:.24s">
+      <div class="why-card-icon">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Dedicated Support</h3>
+      <p>A personal, responsive team that listens, adapts, and stays with you long after delivery.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="page-cta">
+  <div class="cta-inner reveal">
+    <div class="eyebrow">Ready to get started?</div>
+    <h2>Let's engineer your next solar project together.</h2>
+    <p>Tell us about your project and we'll get back to you with a tailored plan — no obligation, no fluff.</p>
+    <div class="cta-btns">
+      <a class="btn-white" href="https://mpssolar.com/contact/">Start a Project ↗</a>
+      <a class="btn-wline" href="mps-solar-redesign.html">← Back to Home</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-top">
+    <div class="foot-brand">
+      <h3>MPS<span>SOLAR</span></h3>
+      <p>Mono-Poly Solutions — engineering every era of solar. From design to decommissioning, across four continents.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#s1">Design &amp; Engineering</a></li>
+        <li><a href="#s2">BESS Solutions</a></li>
+        <li><a href="#s3">Technical Docs</a></li>
+        <li><a href="#s4">Installation Support</a></li>
+        <li><a href="#s5">O&amp;M &amp; Maintenance</a></li>
+        <li><a href="#s6">BOS Supply</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="mps-solar-redesign.html">Home</a></li>
+        <li><a href="mps-solar-redesign.html#why">About MPS</a></li>
+        <li><a href="mps-solar-redesign.html#testimonials">Client Reviews</a></li>
+        <li><a href="https://mpssolar.com/mps-solar-solar-project-portfolio/">Projects</a></li>
+        <li><a href="https://mpssolar.com/contact/">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-copy">© 2024 MPS Solar — Mono-Poly Solutions. All Rights Reserved.</div>
+    <div class="foot-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms &amp; Conditions</a>
+      <a href="https://mpssolar.com/contact/">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Sun Cursor ── */
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches)return;
+  const sun=document.getElementById('sun-cursor');
+  let mx=0,my=0,cx=0,cy=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;sun.style.opacity='1'});
+  (function a(){cx+=(mx-cx)*.14;cy+=(my-cy)*.14;sun.style.left=cx+'px';sun.style.top=cy+'px';requestAnimationFrame(a)})();
+  document.querySelectorAll('a,button,.svc-card,.why-card,.partner-logo').forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('cursor-grow'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('cursor-grow'));
+  });
+  const darks=document.querySelectorAll('#page-hero,#partners,#page-cta,footer');
+  const dObs=new IntersectionObserver(()=>{
+    const any=[...darks].some(s=>{const r=s.getBoundingClientRect();return r.top<window.innerHeight/2&&r.bottom>window.innerHeight/2});
+    document.body.classList.toggle('cursor-dark',any);
+  },{threshold:[0,.5,1]});
+  darks.forEach(s=>dObs.observe(s));
+  document.addEventListener('mouseleave',()=>sun.style.opacity='0');
+  document.addEventListener('mouseenter',()=>sun.style.opacity='1');
+})();
+
+/* ── Mobile Nav ── */
+const ham=document.getElementById('ham'),mob=document.getElementById('mobNav');
+ham.addEventListener('click',()=>{ham.classList.toggle('open');mob.classList.toggle('open');document.body.style.overflow=mob.classList.contains('open')?'hidden':''});
+function cM(){ham.classList.remove('open');mob.classList.remove('open');document.body.style.overflow=''}
+
+/* ── Reveal ── */
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+/* ── Active service pill on scroll ── */
+const sections=['s1','s2','s3','s4','s5','s6'];
+const pills=document.querySelectorAll('.svc-pill');
+const navH=document.getElementById('svc-nav').offsetHeight+68;
+const secObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const id=e.target.id;
+      pills.forEach(p=>{
+        p.classList.toggle('active',p.getAttribute('href')==='#'+id);
+      });
+      // scroll active pill into view
+      const active=document.querySelector('.svc-pill.active');
+      if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+    }
+  });
+},{rootMargin:`-${navH}px 0px -50% 0px`,threshold:0});
+sections.forEach(id=>{const el=document.getElementById(id);if(el)secObs.observe(el)});
+</script>
+</body>
+</html>
