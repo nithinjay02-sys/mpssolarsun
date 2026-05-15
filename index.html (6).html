@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MPS Solar — Engineering Every Era of Solar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<!-- OpenSolar uses Sora — clean geometric, mixed weights -->
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@1&display=swap" rel="stylesheet"/>
+<style>
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+/* ── DESIGN TOKENS ── */
+:root{
+  /* Palette (Solar Energy World base) */
+  --white:#ffffff;
+  --bg:#f8f9fb;
+  --bg2:#eef1f6;
+  --navy:#0c1f3d;
+  --navy2:#1a3560;
+  --blue-mid:#2a5298;
+  --orange:#f47c20;
+  --orange2:#d9650c;
+  --orange-pale:#fff4eb;
+  --border:#dce4ef;
+  --text:#3b4f68;       /* body — medium weight, not too dark */
+  --text-light:#7a8fa8; /* muted labels */
+  --sky:#e8f4fd;
+  /* Typography — OpenSolar style */
+  --font:'Sora',sans-serif;
+  --font-serif:'DM Serif Display',serif;
+  /* Nav */
+  --nav-h:68px;
+}
+
+body{
+  background:var(--white);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:16px;
+  line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  cursor:none;
+}
+
+/* ── SUN CURSOR ── */
+#sun-cursor{
+  position:fixed;
+  pointer-events:none;
+  z-index:99999;
+  top:0;left:0;
+  width:36px;height:36px;
+  transform:translate(-50%,-50%);
+  will-change:transform;
+  transition:width .25s ease,height .25s ease,opacity .3s;
+  opacity:0; /* hidden until first mousemove */
+}
+#sun-cursor svg{
+  width:100%;height:100%;
+  animation:sunSpin 8s linear infinite;
+  filter:drop-shadow(0 0 6px rgba(244,124,32,.55));
+}
+/* grow on hover over interactive elements */
+body.cursor-grow #sun-cursor{width:52px;height:52px}
+/* slow spin on dark sections */
+body.cursor-dark #sun-cursor svg{
+  filter:drop-shadow(0 0 8px rgba(255,200,80,.7));
+}
+@keyframes sunSpin{
+  from{transform:rotate(0deg)}
+  to{transform:rotate(360deg)}
+}
+
+/* hide sun on touch devices */
+@media(pointer:coarse){
+  #sun-cursor{display:none}
+  body{cursor:auto}
+}
+
+/* ── UTILITIES ── */
+.container{width:100%;max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem)}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+
+/* Tag label — like OpenSolar's category labels */
+.eyebrow{
+  display:inline-block;
+  font-size:11px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--orange);margin-bottom:.9rem;
+}
+
+/* OpenSolar-style reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* ── LOADER ── */
+#loader{
+  position:fixed;inset:0;background:var(--navy);z-index:9000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;
+  transition:opacity .7s,visibility .7s;
+}
+#loader.done{opacity:0;visibility:hidden}
+.ld-logo{font-size:clamp(2rem,7vw,3.5rem);font-weight:700;letter-spacing:.05em;color:#fff}
+.ld-logo span{color:var(--orange)}
+.ld-track{width:min(240px,70vw);height:2px;background:rgba(255,255,255,.12);border-radius:2px;overflow:hidden}
+.ld-bar{height:100%;width:0%;background:var(--orange);border-radius:2px}
+.ld-pct{font-size:11px;font-weight:500;letter-spacing:.2em;color:rgba(255,255,255,.5);text-transform:uppercase}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:var(--nav-h);background:rgba(255,255,255,.97);
+  border-bottom:1px solid var(--border);
+  backdrop-filter:blur(10px);
+  display:flex;align-items:center;
+}
+.nav-wrap{
+  width:100%;max-width:1160px;margin:0 auto;
+  padding:0 clamp(1.25rem,4vw,2.5rem);
+  display:flex;align-items:center;justify-content:space-between;gap:2rem;
+}
+.nav-logo{font-size:1.35rem;font-weight:700;letter-spacing:.03em;color:var(--navy);flex-shrink:0}
+.nav-logo span{color:var(--orange)}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{
+  font-size:13.5px;font-weight:400;color:var(--text);
+  transition:color .2s;white-space:nowrap;
+}
+.nav-links a:hover{color:var(--orange)}
+.nav-cta{
+  font-size:13px;font-weight:600;
+  color:#fff;background:var(--orange);
+  padding:.55rem 1.35rem;border-radius:6px;
+  transition:background .2s;white-space:nowrap;flex-shrink:0;
+}
+.nav-cta:hover{background:var(--orange2)}
+/* hamburger */
+.nav-ham{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;z-index:10}
+.nav-ham span{display:block;width:22px;height:1.5px;background:var(--navy);border-radius:2px;transition:transform .3s,opacity .3s}
+.nav-ham.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.nav-ham.open span:nth-child(2){opacity:0}
+.nav-ham.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+/* mobile overlay */
+.mob-nav{
+  display:none;position:fixed;inset:0;z-index:400;
+  background:var(--white);
+  flex-direction:column;align-items:center;justify-content:center;gap:2.25rem;
+}
+.mob-nav.open{display:flex}
+.mob-nav a{font-size:clamp(1.4rem,5vw,2rem);font-weight:500;color:var(--navy);transition:color .2s}
+.mob-nav a:hover{color:var(--orange)}
+.mob-nav .mob-cta{
+  margin-top:.5rem;font-size:1rem;font-weight:600;
+  color:#fff;background:var(--orange);
+  padding:.75rem 2.25rem;border-radius:8px;
+}
+
+/* ── HERO ── */
+#hero{
+  min-height:100vh;padding-top:var(--nav-h);
+  background:linear-gradient(140deg,var(--navy) 0%,var(--navy2) 55%,#1e4d9a 100%);
+  display:flex;align-items:center;
+  position:relative;overflow:hidden;
+}
+/* subtle dot grid */
+#hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+/* orange glow */
+#hero::after{
+  content:'';position:absolute;
+  right:-12vw;top:-18vh;
+  width:60vw;height:60vw;border-radius:50%;
+  background:radial-gradient(circle,rgba(244,124,32,.16) 0%,transparent 65%);
+  pointer-events:none;
+}
+.hero-grid{
+  position:relative;z-index:2;
+  display:grid;grid-template-columns:1fr 400px;
+  gap:3.5rem;align-items:center;
+  padding:clamp(3rem,7vh,5.5rem) clamp(1.25rem,5vw,2.5rem);
+  width:100%;max-width:1160px;margin:0 auto;
+}
+/* left */
+.h-eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:1.1rem;opacity:0;animation:fadeUp .8s ease .3s forwards}
+.hero-h1{
+  font-size:clamp(2.4rem,5vw,4.4rem);
+  font-weight:700;line-height:1.1;color:#fff;
+  margin-bottom:1.4rem;
+  opacity:0;animation:fadeUp .8s ease .45s forwards;
+  letter-spacing:-.015em;
+}
+.hero-h1 em{font-style:normal;color:var(--orange)}
+.hero-sub{
+  font-size:clamp(.95rem,1.6vw,1.1rem);font-weight:400;line-height:1.75;
+  color:rgba(255,255,255,.65);max-width:500px;margin-bottom:2.25rem;
+  opacity:0;animation:fadeUp .8s ease .6s forwards;
+}
+.hero-btns{display:flex;gap:.875rem;flex-wrap:wrap;opacity:0;animation:fadeUp .8s ease .75s forwards}
+.btn-orange{
+  font-size:14px;font-weight:600;color:#fff;background:var(--orange);
+  padding:.8rem 1.85rem;border-radius:7px;
+  transition:background .2s,transform .15s;display:inline-flex;align-items:center;gap:.4rem;
+}
+.btn-orange:hover{background:var(--orange2);transform:translateY(-1px)}
+.btn-ghost{
+  font-size:14px;font-weight:500;color:rgba(255,255,255,.8);
+  border:1.5px solid rgba(255,255,255,.25);
+  padding:.8rem 1.85rem;border-radius:7px;
+  transition:border-color .2s,background .2s;
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.06)}
+
+/* hero card — OpenSolar-style glass stats */
+.hero-card{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:1.75rem 1.5rem;
+  backdrop-filter:blur(6px);
+  opacity:0;animation:fadeUp .9s ease .65s forwards;
+}
+.hero-card-label{
+  font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  color:rgba(255,255,255,.4);margin-bottom:1.4rem;
+}
+.stat-list{display:flex;flex-direction:column;gap:1rem}
+.stat-row{
+  display:flex;align-items:center;gap:1rem;
+  background:rgba(255,255,255,.05);
+  border-radius:10px;padding:.875rem 1rem;
+}
+.stat-icon{
+  width:38px;height:38px;border-radius:8px;background:var(--orange);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.stat-icon svg{width:18px;height:18px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.stat-num{font-size:1.55rem;font-weight:700;color:#fff;line-height:1}
+.stat-num sub{font-size:.9em;color:var(--orange);font-weight:700}
+.stat-lbl{font-size:11px;font-weight:400;color:rgba(255,255,255,.45);letter-spacing:.06em;text-transform:uppercase;margin-top:.15rem}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+/* ── TRUST BAR ── */
+#trust{
+  background:var(--white);
+  border-bottom:1px solid var(--border);
+  padding:1.1rem 0;
+}
+.trust-row{
+  display:flex;align-items:center;justify-content:center;
+  flex-wrap:wrap;gap:1.25rem 2.75rem;
+  max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem);
+}
+.trust-item{
+  display:flex;align-items:center;gap:.45rem;
+  font-size:12px;font-weight:500;color:var(--text-light);letter-spacing:.04em;
+}
+.trust-item svg{width:14px;height:14px;fill:var(--orange);flex-shrink:0}
+
+/* ── SECTION HEADING ── */
+.sec-head{text-align:center;margin-bottom:clamp(2.5rem,5vh,3.75rem)}
+.sec-head h2{font-size:clamp(1.65rem,3vw,2.5rem);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.015em;margin-bottom:.7rem}
+.sec-head p{font-size:clamp(.9rem,1.4vw,1.05rem);font-weight:400;color:var(--text);max-width:560px;margin:0 auto;line-height:1.75}
+
+/* ── MISSION SECTION (alternating) ── */
+#mission{padding:clamp(4rem,8vh,7rem) 0;background:var(--white)}
+.mission-pair{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:clamp(2rem,5vw,5rem);align-items:center;
+  margin-bottom:clamp(4rem,7vh,6rem);
+}
+.mission-pair:last-child{margin-bottom:0}
+/* flip: image right on even rows */
+.mission-pair.flip .m-img{order:2}
+.mission-pair.flip .m-text{order:1}
+/* image */
+.m-img{border-radius:14px;overflow:hidden;box-shadow:0 8px 32px rgba(12,31,61,.1)}
+.m-img img{width:100%;height:380px;object-fit:cover;display:block;transition:transform .55s ease}
+.m-img:hover img{transform:scale(1.04)}
+/* text */
+.m-text h3{
+  font-size:clamp(1.35rem,2.2vw,1.9rem);
+  font-weight:700;color:var(--navy);line-height:1.25;
+  letter-spacing:-.015em;margin-bottom:1rem;
+}
+.m-text p{
+  font-size:clamp(.875rem,1.3vw,.975rem);
+  font-weight:400;color:var(--text);line-height:1.8;margin-bottom:.875rem;
+}
+.m-text p:last-of-type{margin-bottom:1.5rem}
+.link-arrow{
+  display:inline-flex;align-items:center;gap:.35rem;
+  font-size:13.5px;font-weight:600;color:var(--orange);
+  transition:gap .2s;
+}
+.link-arrow::after{content:'→';transition:transform .2s}
+.link-arrow:hover{gap:.55rem}
+
+/* ── METRICS ── */
+#metrics{
+  padding:clamp(3rem,5vh,4.5rem) 0;
+  background:var(--navy);
+}
+.metrics-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem);
+}
+.mc{
+  text-align:center;padding:2.25rem 1.25rem;
+  border-right:1px solid rgba(255,255,255,.08);
+}
+.mc:last-child{border-right:none}
+.mc-val{
+  font-size:clamp(2.2rem,4vw,3.5rem);font-weight:700;
+  color:#fff;line-height:1;letter-spacing:-.02em;
+}
+.mc-val sub{font-size:.65em;color:var(--orange);font-weight:700;vertical-align:baseline}
+.mc-lbl{font-size:11px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.38);margin-top:.65rem}
+
+/* ── SERVICES ── */
+#services{padding:clamp(4rem,8vh,7rem) 0;background:var(--bg)}
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+.svc-card{
+  background:var(--white);border:1px solid var(--border);border-radius:12px;
+  overflow:hidden;display:flex;flex-direction:column;
+  transition:transform .25s,box-shadow .25s;
+  box-shadow:0 1px 8px rgba(12,31,61,.04);
+}
+.svc-card:hover{transform:translateY(-3px);box-shadow:0 10px 32px rgba(12,31,61,.1)}
+.svc-img-wrap{height:190px;overflow:hidden;flex-shrink:0}
+.svc-img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.svc-card:hover .svc-img{transform:scale(1.05)}
+.svc-body{padding:1.35rem 1.35rem 1.75rem;flex:1;display:flex;flex-direction:column}
+.svc-num{font-size:10.5px;font-weight:600;letter-spacing:.14em;color:var(--orange);text-transform:uppercase;margin-bottom:.5rem}
+.svc-name{font-size:1rem;font-weight:600;color:var(--navy);margin-bottom:.5rem;line-height:1.3}
+.svc-text{font-size:.855rem;font-weight:400;color:var(--text);line-height:1.7;flex:1}
+
+/* ── WHY MPS ── */
+#why{padding:clamp(4rem,8vh,7rem) 0;background:var(--white)}
+.why-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2.5rem,5vw,5rem);align-items:start}
+.why-left h2{font-size:clamp(1.65rem,2.8vw,2.4rem);font-weight:700;color:var(--navy);line-height:1.2;letter-spacing:-.015em;margin-bottom:1rem}
+.why-left p{font-size:clamp(.875rem,1.3vw,.975rem);color:var(--text);line-height:1.8;margin-bottom:2rem}
+.why-pts{display:flex;flex-direction:column;gap:.75rem}
+.why-pt{
+  display:flex;gap:.875rem;align-items:flex-start;
+  padding:1rem 1.1rem;border-radius:10px;
+  background:var(--bg);border:1px solid var(--border);
+  transition:background .2s,border-color .2s;
+}
+.why-pt:hover{background:var(--sky);border-color:#b8d8f0}
+.why-pt-dot{
+  width:32px;height:32px;border-radius:7px;
+  background:var(--orange);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;margin-top:.05rem;
+}
+.why-pt-dot svg{width:15px;height:15px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.why-pt-title{font-size:.9rem;font-weight:600;color:var(--navy);margin-bottom:.2rem}
+.why-pt-body{font-size:.82rem;font-weight:400;color:var(--text);line-height:1.6}
+
+/* ── TESTIMONIALS ── */
+#testimonials{padding:clamp(4rem,8vh,7rem) 0;background:var(--bg)}
+.test-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
+.test-card{
+  background:var(--white);border:1px solid var(--border);border-radius:12px;
+  padding:1.75rem;position:relative;
+  box-shadow:0 1px 8px rgba(12,31,61,.04);
+  transition:transform .25s,box-shadow .25s;
+}
+.test-card:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(12,31,61,.09)}
+.stars{display:flex;gap:.2rem;margin-bottom:.875rem}
+.stars svg{width:14px;height:14px;fill:var(--orange)}
+.test-q{
+  font-family:var(--font-serif);font-style:italic;
+  font-size:clamp(.92rem,1.3vw,1.05rem);color:var(--navy);
+  line-height:1.7;margin-bottom:1.25rem;font-weight:400;
+}
+.test-author{font-size:.855rem;font-weight:600;color:var(--navy)}
+.test-role{font-size:.78rem;font-weight:400;color:var(--text-light);margin-top:.15rem}
+.test-mark{
+  position:absolute;top:1.1rem;right:1.25rem;
+  font-family:var(--font-serif);font-style:italic;font-size:4.5rem;
+  color:rgba(244,124,32,.08);line-height:1;
+}
+
+/* ── CTA ── */
+#cta{
+  padding:clamp(4rem,8vh,6rem) 0;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);
+  position:relative;overflow:hidden;
+}
+#cta::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.cta-wrap{position:relative;z-index:1;text-align:center}
+.cta-wrap .eyebrow{color:rgba(255,255,255,.5)}
+.cta-wrap h2{font-size:clamp(1.75rem,3.5vw,3rem);font-weight:700;color:#fff;line-height:1.15;letter-spacing:-.015em;margin-bottom:.875rem}
+.cta-wrap p{font-size:clamp(.925rem,1.5vw,1.1rem);font-weight:400;color:rgba(255,255,255,.65);max-width:480px;margin:0 auto 2rem;line-height:1.7}
+.cta-btns{display:flex;gap:.875rem;justify-content:center;flex-wrap:wrap}
+.btn-white{font-size:14px;font-weight:600;color:var(--orange);background:#fff;padding:.85rem 2rem;border-radius:7px;transition:transform .15s,box-shadow .15s}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.btn-white-line{font-size:14px;font-weight:500;color:rgba(255,255,255,.8);border:1.5px solid rgba(255,255,255,.25);padding:.85rem 2rem;border-radius:7px;transition:border-color .2s}
+.btn-white-line:hover{border-color:rgba(255,255,255,.65)}
+
+/* ── FOOTER ── */
+footer{background:var(--navy);padding:clamp(3rem,5vh,4.5rem) 0 1.75rem}
+.foot-top{
+  display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;
+  max-width:1160px;margin:0 auto;padding:0 clamp(1.25rem,5vw,2.5rem);
+  margin-bottom:2.5rem;
+}
+.foot-brand h3{font-size:1.25rem;font-weight:700;color:#fff;letter-spacing:.03em;margin-bottom:.7rem}
+.foot-brand h3 span{color:var(--orange)}
+.foot-brand p{font-size:.85rem;font-weight:400;color:rgba(255,255,255,.45);line-height:1.75;max-width:270px}
+.foot-col h4{font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:1.1rem}
+.foot-col ul{list-style:none;display:flex;flex-direction:column;gap:.55rem}
+.foot-col a{font-size:.855rem;font-weight:400;color:rgba(255,255,255,.55);transition:color .2s}
+.foot-col a:hover{color:var(--orange)}
+.foot-bottom{
+  max-width:1160px;margin:0 auto;padding:1.5rem clamp(1.25rem,5vw,2.5rem) 0;
+  border-top:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+}
+.foot-copy{font-size:.78rem;font-weight:400;color:rgba(255,255,255,.28)}
+.foot-legal{display:flex;gap:1.5rem;flex-wrap:wrap}
+.foot-legal a{font-size:.78rem;color:rgba(255,255,255,.28);transition:color .2s}
+.foot-legal a:hover{color:rgba(255,255,255,.7)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:2.5rem}
+  .hero-card{max-width:500px}
+  .stat-list{display:grid;grid-template-columns:1fr 1fr;gap:.875rem}
+  .mission-pair,.mission-pair.flip .m-img,.mission-pair.flip .m-text{order:unset}
+  .mission-pair{grid-template-columns:1fr}
+  .m-img img{height:280px}
+  .why-grid{grid-template-columns:1fr;gap:2.5rem}
+  .foot-top{grid-template-columns:1fr 1fr}
+}
+
+@media(max-width:900px){
+  :root{--nav-h:60px}
+  .nav-links,.nav-cta{display:none}
+  .nav-ham{display:flex}
+  .svc-grid{grid-template-columns:repeat(2,1fr)}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .mc{border-right:none;border-bottom:1px solid rgba(255,255,255,.08)}
+  .mc:nth-child(2n){border-left:1px solid rgba(255,255,255,.08)}
+  .mc:nth-last-child(-n+2){border-bottom:none}
+  .test-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:600px){
+  :root{--nav-h:56px}
+  .svc-grid{grid-template-columns:1fr}
+  .hero-grid{padding-top:2rem;padding-bottom:3rem}
+  .stat-list{grid-template-columns:1fr}
+  .m-img img{height:220px}
+  .mission-pair{gap:1.5rem}
+  .foot-top{grid-template-columns:1fr;gap:2rem}
+  .foot-bottom{flex-direction:column;align-items:flex-start}
+  .cta-btns{flex-direction:column;align-items:center}
+  .btn-orange,.btn-ghost,.btn-white,.btn-white-line{width:100%;justify-content:center;text-align:center}
+  .hero-btns{flex-direction:column}
+  .trust-row{gap:.875rem 2rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ── SUN CURSOR ── -->
+<div id="sun-cursor" aria-hidden="true">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Rays -->
+    <g stroke="#f47c20" stroke-linecap="round">
+      <line x1="50" y1="4"  x2="50" y2="16" stroke-width="5"/>
+      <line x1="50" y1="84" x2="50" y2="96" stroke-width="5"/>
+      <line x1="4"  y1="50" x2="16" y2="50" stroke-width="5"/>
+      <line x1="84" y1="50" x2="96" y2="50" stroke-width="5"/>
+      <line x1="18" y1="18" x2="26" y2="26" stroke-width="4"/>
+      <line x1="74" y1="74" x2="82" y2="82" stroke-width="4"/>
+      <line x1="82" y1="18" x2="74" y2="26" stroke-width="4"/>
+      <line x1="26" y1="74" x2="18" y2="82" stroke-width="4"/>
+    </g>
+    <!-- Core circle -->
+    <circle cx="50" cy="50" r="22" fill="#f47c20"/>
+    <!-- Shine highlight -->
+    <circle cx="43" cy="43" r="7" fill="rgba(255,255,255,0.25)"/>
+  </svg>
+</div>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-logo">MPS<span>SOLAR</span></div>
+  <div class="ld-track"><div class="ld-bar" id="ldBar"></div></div>
+  <div class="ld-pct" id="ldPct">0%</div>
+</div>
+
+<!-- MOBILE MENU -->
+<div class="mob-nav" id="mobNav">
+  <a href="#mission" onclick="cM()">About</a>
+  <a href="#services" onclick="cM()">Services</a>
+  <a href="#why" onclick="cM()">Why MPS</a>
+  <a href="#testimonials" onclick="cM()">Reviews</a>
+  <a href="#cta" class="mob-cta" onclick="cM()">Get In Touch</a>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-wrap">
+    <a class="nav-logo" href="#">MPS<span>SOLAR</span></a>
+    <ul class="nav-links">
+      <li><a href="#mission">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#why">Why MPS</a></li>
+      <li><a href="#testimonials">Reviews</a></li>
+      <li><a href="#cta">Contact</a></li>
+    </ul>
+    <a class="nav-cta" href="#cta">Get In Touch</a>
+    <button class="nav-ham" id="ham" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid">
+    <div class="hero-left">
+      <div class="h-eyebrow">Mono-Poly Solutions · Global Solar Engineering</div>
+      <h1 class="hero-h1">From <em>Mono</em> to Poly.<br/>We engineer<br/>every era of solar.</h1>
+      <p class="hero-sub">10 GW engineered. 5 GW managed. Across 4 continents — from design and BESS to commissioning and long-term O&amp;M.</p>
+      <div class="hero-btns">
+        <a class="btn-orange" href="#cta">Get In Touch ↗</a>
+        <a class="btn-ghost" href="#services">Explore Services</a>
+      </div>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-card-label">Our Impact at a Glance</div>
+      <div class="stat-list">
+        <div class="stat-row">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div>
+            <div class="stat-num"><span class="cu" data-t="10">0</span><sub>GW</sub></div>
+            <div class="stat-lbl">Engineered</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/></svg>
+          </div>
+          <div>
+            <div class="stat-num"><span class="cu" data-t="5">0</span><sub>GW</sub></div>
+            <div class="stat-lbl">Managed (O&amp;M)</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div>
+            <div class="stat-num"><span class="cu" data-t="4">0</span></div>
+            <div class="stat-lbl">Continents</div>
+          </div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div>
+            <div class="stat-num"><span class="cu" data-t="200">0</span><sub>+</sub></div>
+            <div class="stat-lbl">Projects Completed</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div id="trust">
+  <div class="trust-row">
+    <div class="trust-item"><svg viewBox="0 0 16 16"><path d="M8 1l1.9 3.8 4.1.6-3 2.9.7 4.2L8 10.4l-3.7 2.1.7-4.2L2 5.4l4.1-.6z"/></svg>10+ Years Experience</div>
+    <div class="trust-item"><svg viewBox="0 0 16 16"><path d="M8 1l1.9 3.8 4.1.6-3 2.9.7 4.2L8 10.4l-3.7 2.1.7-4.2L2 5.4l4.1-.6z"/></svg>4 Continents Served</div>
+    <div class="trust-item"><svg viewBox="0 0 16 16"><path d="M8 1l1.9 3.8 4.1.6-3 2.9.7 4.2L8 10.4l-3.7 2.1.7-4.2L2 5.4l4.1-.6z"/></svg>10 GW Engineered</div>
+    <div class="trust-item"><svg viewBox="0 0 16 16"><path d="M8 1l1.9 3.8 4.1.6-3 2.9.7 4.2L8 10.4l-3.7 2.1.7-4.2L2 5.4l4.1-.6z"/></svg>End-to-End Solutions</div>
+    <div class="trust-item"><svg viewBox="0 0 16 16"><path d="M8 1l1.9 3.8 4.1.6-3 2.9.7 4.2L8 10.4l-3.7 2.1.7-4.2L2 5.4l4.1-.6z"/></svg>200+ Projects Done</div>
+  </div>
+</div>
+
+<!-- MISSION — alternating layout -->
+<section id="mission">
+  <div class="container">
+
+    <!-- Row 1: image left, text right — NEW IMAGE 1 (engineer on rooftop) -->
+    <div class="mission-pair reveal">
+      <div class="m-img">
+        <img src="mps-hero-engineer.png" alt="MPS Solar engineer reviewing project design on rooftop" loading="lazy"/>
+      </div>
+      <div class="m-text">
+        <div class="eyebrow">Design &amp; Engineering</div>
+        <h3>Performance engineered from day one</h3>
+        <p>We design smart, scalable systems for rooftop, ground-mount, floating, and carport applications. Every project starts with deep engineering analysis — ensuring maximum performance from the first kilowatt to the last.</p>
+        <p>From detailed IFC drawings to full system layout, our engineers handle every technical dimension with precision and care.</p>
+        <a class="link-arrow" href="#services">Explore all services</a>
+      </div>
+    </div>
+
+    <!-- Row 2: text left, image right — NEW IMAGE 2 (blueprints desk) -->
+    <div class="mission-pair flip reveal" style="transition-delay:.1s">
+      <div class="m-img">
+        <img src="mps-bess-design.png" alt="MPS Solar engineering blueprints and solar system design model" loading="lazy"/>
+      </div>
+      <div class="m-text">
+        <div class="eyebrow">Battery Energy Storage</div>
+        <h3>Store smarter. Shift energy with confidence.</h3>
+        <p>Our BESS solutions — AC and DC coupled — are purpose-built for energy shifting, peak shaving, and microgrid stability. We evaluate your grid conditions and design a strategy tailored specifically to your ROI targets.</p>
+        <p>From sizing to commissioning, every storage project is engineered for long-term reliability.</p>
+        <a class="link-arrow" href="#services">See BESS services</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- METRICS -->
+<section id="metrics">
+  <div class="metrics-grid">
+    <div class="mc reveal">
+      <div class="mc-val"><span class="ce" data-t="10">0</span><sub>GW</sub></div>
+      <div class="mc-lbl">Engineered</div>
+    </div>
+    <div class="mc reveal" style="transition-delay:.08s">
+      <div class="mc-val"><span class="ce" data-t="5">0</span><sub>GW</sub></div>
+      <div class="mc-lbl">Managed</div>
+    </div>
+    <div class="mc reveal" style="transition-delay:.16s">
+      <div class="mc-val"><span class="ce" data-t="3">0</span><sub>GW</sub></div>
+      <div class="mc-lbl">Consulted</div>
+    </div>
+    <div class="mc reveal" style="transition-delay:.24s">
+      <div class="mc-val"><span class="ce" data-t="200">0</span><sub>+</sub></div>
+      <div class="mc-lbl">Projects</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="eyebrow">What we do</div>
+      <h2>Comprehensive solar engineering services</h2>
+      <p>From initial concept to long-term operation, our team delivers engineering excellence at every stage of the solar lifecycle.</p>
+    </div>
+
+    <div class="svc-grid">
+      <div class="svc-card reveal">
+        <div class="svc-img-wrap">
+          <img class="svc-img" src="https://mpssolar.com/wp-content/uploads/elementor/thumbs/WhatsApp-Image-2025-05-21-at-5.43.44-PM-r64vr9kpfsi1axom3ggtwi9hvj3t8xyx7pkjpbffk8.jpeg" alt="Design and Engineering" loading="lazy"/>
+        </div>
+        <div class="svc-body">
+          <div class="svc-num">Service 01</div>
+          <div class="svc-name">Design &amp; Engineering</div>
+          <p class="svc-text">Smart, scalable engineering for rooftop, ground-mount, floating, and carport systems — performance from day one, built to last.</p>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" style="transition-delay:.07s">
+        <div class="svc-img-wrap">
+          <img class="svc-img" src="https://mpssolar.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-19-at-5.02.04-PM.webp" alt="Battery Energy Storage Systems" loading="lazy"/>
+        </div>
+        <div class="svc-body">
+          <div class="svc-num">Service 02</div>
+          <div class="svc-name">Battery Energy Storage (BESS)</div>
+          <p class="svc-text">Tailored AC/DC coupled storage solutions for energy shifting, peak shaving, and microgrid stability — optimised to your grid and ROI.</p>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" style="transition-delay:.14s">
+        <div class="svc-img-wrap">
+          <img class="svc-img" src="https://mpssolar.com/wp-content/uploads/elementor/thumbs/pexels-photo-5816283-5816283-r5wp79x1qydofimqwl3cikh08rp5gerrzdrxjjgm7k.jpg" alt="Technical Documentation" loading="lazy"/>
+        </div>
+        <div class="svc-body">
+          <div class="svc-num">Service 03</div>
+          <div class="svc-name">Technical Docs &amp; Tender Support</div>
+          <p class="svc-text">From BOQ to bid — complete engineering documentation, tender packages, and technical vetting for EPC selection and procurement.</p>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" style="transition-delay:.21s">
+        <div class="svc-img-wrap">
+          <img class="svc-img" src="https://mpssolar.com/wp-content/uploads/2025/05/WhatsApp-Image-2025-05-21-at-5.10.29-PM.jpeg" alt="Installation and Commissioning" loading="lazy"/>
+        </div>
+        <div class="svc-body">
+          <div class="svc-num">Service 04</div>
+          <div class="svc-name">Installation &amp; Commissioning</div>
+          <p class="svc-text">End-to-end support during construction, including IFC drawings, engineering coordination, and commissioning compliance checks.</p>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" style="transition-delay:.28s">
+        <div class="svc-img-wrap">
+          <img class="svc-img" src="https://mpssolar.com/wp-content/uploads/elementor/thumbs/WhatsApp-Image-2025-05-19-at-7.08.46-PM-r61ovfpd6o35wee0cvtdb73duablmzrxay1m37poco.webp" alt="O&M and Predictive Maintenance" loading="lazy"/>
+        </div>
+        <div class="svc-body">
+          <div class="svc-num">Service 05</div>
+          <div class="svc-name">O&amp;M &amp; Predictive Maintenance</div>
+          <p class="svc-text">Daily to yearly performance tracking, root cause diagnostics, and maintenance planning driven by real-time and big-data insights.</p>
+        </div>
+      </div>
+
+      <div class="svc-card reveal" style="transition-delay:.35s">
+        <div class="svc-img-wrap">
+          <img class="svc-img" src="https://mpssolar.com/wp-content/uploads/elementor/thumbs/pexels-photo-6169668-6169668-scaled-r64v1s66xmw0rvwlttrmba9aliar05hwvq8t9ouce8.jpg" alt="BOS Supply" loading="lazy"/>
+        </div>
+        <div class="svc-body">
+          <div class="svc-num">Service 06</div>
+          <div class="svc-name">Balance of System (BOS) Supply</div>
+          <p class="svc-text">Cables, panels, structures, protections, and SCADA gear — every critical component beyond modules and inverters, quality-assured.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY MPS -->
+<section id="why">
+  <div class="container">
+    <div class="why-grid">
+      <div class="why-left reveal">
+        <div class="eyebrow">Why MPS Solar</div>
+        <h2>We don't just keep up with solar — we shape where it's going.</h2>
+        <p>Our team combines deep technical expertise with genuine passion for the energy transition, delivering solutions that perform today and scale for tomorrow — on every continent, for every client.</p>
+        <a class="btn-orange" href="#cta" style="display:inline-flex">Get In Touch ↗</a>
+      </div>
+      <div class="why-pts reveal" style="transition-delay:.15s">
+        <div class="why-pt">
+          <div class="why-pt-dot">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div>
+            <div class="why-pt-title">Global expertise, local precision</div>
+            <p class="why-pt-body">Operating across Australia, Europe, India and beyond — we understand every grid code, climate, and market challenge unique to your location.</p>
+          </div>
+        </div>
+        <div class="why-pt">
+          <div class="why-pt-dot">
+            <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div>
+            <div class="why-pt-title">Deep engineering, every time</div>
+            <p class="why-pt-body">From IFC drawings to final commissioning — technically sound teams who handle complex requirements with meticulous precision.</p>
+          </div>
+        </div>
+        <div class="why-pt">
+          <div class="why-pt-dot">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div>
+            <div class="why-pt-title">True partnership, not just a vendor</div>
+            <p class="why-pt-body">We listen, tailor, and show up — building long-term relationships grounded in performance and trust across every continent we serve.</p>
+          </div>
+        </div>
+        <div class="why-pt">
+          <div class="why-pt-dot">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div>
+            <div class="why-pt-title">Responsive and consistently reliable</div>
+            <p class="why-pt-body">Always a step ahead in solving challenges. Our clients choose us again — and again — for exactly that reason.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="eyebrow">Client reviews</div>
+      <h2>What our clients say</h2>
+      <p>Trusted by EPCs, developers, and installers across four continents.</p>
+    </div>
+    <div class="test-grid">
+      <div class="test-card reveal">
+        <div class="test-mark">"</div>
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <p class="test-q">"We've been working with MPS for several years and they've consistently delivered reliable, high-quality engineering and support. Always a step ahead in solving challenges."</p>
+        <div class="test-author">Bengt Arnby</div>
+        <div class="test-role">Project Manager, Leading EPC — Sweden</div>
+      </div>
+      <div class="test-card reveal" style="transition-delay:.1s">
+        <div class="test-mark">"</div>
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <p class="test-q">"MPS has been an integral part of our solar journey. Their team brings technical depth and a proactive attitude that makes every project smoother. A true long-term partner."</p>
+        <div class="test-author">Thomas Eriksson</div>
+        <div class="test-role">Project Developer — Finland</div>
+      </div>
+      <div class="test-card reveal" style="transition-delay:.2s">
+        <div class="test-mark">"</div>
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <p class="test-q">"What sets MPS apart is their attitude — a friendly, approachable team who genuinely listen and tailor their work. It always feels like working with a true partner, not a vendor."</p>
+        <div class="test-author">Nithin Jay</div>
+        <div class="test-role">Solar Investor — India</div>
+      </div>
+      <div class="test-card reveal" style="transition-delay:.3s">
+        <div class="test-mark">"</div>
+        <div class="stars"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg></div>
+        <p class="test-q">"One of the most technically sound teams we've worked with. Attention to detail, engineering depth, and the ability to handle complex requirements — truly reliable."</p>
+        <div class="test-author">Lincoln J</div>
+        <div class="test-role">Solar Installer — Australia</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="container">
+    <div class="cta-wrap reveal">
+      <div class="eyebrow">Let's work together</div>
+      <h2>Ready to engineer your solar success?</h2>
+      <p>From first concept to final commissioning — and everything in between. Let's build your next solar project together.</p>
+      <div class="cta-btns">
+        <a class="btn-white" href="https://mpssolar.com/contact/">Get a Free Consultation</a>
+        <a class="btn-white-line" href="#services">View All Services</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-top">
+    <div class="foot-brand">
+      <h3>MPS<span>SOLAR</span></h3>
+      <p>Mono-Poly Solutions — engineering every era of solar. From design to decommissioning, across four continents.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Services</h4>
+      <ul>
+        <li><a href="#services">Design &amp; Engineering</a></li>
+        <li><a href="#services">BESS Solutions</a></li>
+        <li><a href="#services">Technical Docs</a></li>
+        <li><a href="#services">Installation Support</a></li>
+        <li><a href="#services">O&amp;M &amp; Maintenance</a></li>
+        <li><a href="#services">BOS Supply</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#mission">About MPS</a></li>
+        <li><a href="#why">Why Choose Us</a></li>
+        <li><a href="#testimonials">Client Reviews</a></li>
+        <li><a href="#metrics">Our Impact</a></li>
+        <li><a href="https://mpssolar.com/contact/">Contact Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <div class="foot-copy">© 2024 MPS Solar — Mono-Poly Solutions. All Rights Reserved.</div>
+    <div class="foot-legal">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms &amp; Conditions</a>
+      <a href="https://mpssolar.com/contact/">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Sun Cursor ── */
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches) return; // skip touch devices
+  const sun = document.getElementById('sun-cursor');
+  let mx=0,my=0,cx=0,cy=0,raf;
+
+  document.addEventListener('mousemove', e=>{
+    mx = e.clientX; my = e.clientY;
+    sun.style.opacity = '1';
+  });
+
+  // Smooth lag follow
+  function animate(){
+    cx += (mx - cx) * 0.14;
+    cy += (my - cy) * 0.14;
+    sun.style.left = cx + 'px';
+    sun.style.top  = cy + 'px';
+    raf = requestAnimationFrame(animate);
+  }
+  animate();
+
+  // Grow on interactive elements
+  document.querySelectorAll('a, button, .svc-card, .test-card, .why-pt, .stat-row').forEach(el=>{
+    el.addEventListener('mouseenter', ()=> document.body.classList.add('cursor-grow'));
+    el.addEventListener('mouseleave', ()=> document.body.classList.remove('cursor-grow'));
+  });
+
+  // Dark glow on dark sections (hero, metrics, cta, footer)
+  const darkSections = document.querySelectorAll('#hero, #metrics, #cta, footer');
+  const darkObs = new IntersectionObserver(entries=>{
+    const anyDark = [...darkSections].some(s=>{
+      const r = s.getBoundingClientRect();
+      return r.top < window.innerHeight/2 && r.bottom > window.innerHeight/2;
+    });
+    document.body.classList.toggle('cursor-dark', anyDark);
+  },{threshold:[0,0.5,1]});
+  darkSections.forEach(s=>darkObs.observe(s));
+
+  // Hide when leaving window
+  document.addEventListener('mouseleave', ()=> sun.style.opacity='0');
+  document.addEventListener('mouseenter', ()=> sun.style.opacity='1');
+})();
+
+/* ── Loader ── */
+const ldBar=document.getElementById('ldBar'),ldPct=document.getElementById('ldPct'),loader=document.getElementById('loader');
+let p=0;
+const iv=setInterval(()=>{
+  p+=Math.random()*13+3;
+  if(p>=100){p=100;clearInterval(iv);ldBar.style.width='100%';ldPct.textContent='100%';setTimeout(()=>loader.classList.add('done'),480)}
+  else{ldBar.style.width=p+'%';ldPct.textContent=Math.floor(p)+'%'}
+},65);
+
+/* ── Mobile nav ── */
+const ham=document.getElementById('ham'),mob=document.getElementById('mobNav');
+ham.addEventListener('click',()=>{ham.classList.toggle('open');mob.classList.toggle('open');document.body.style.overflow=mob.classList.contains('open')?'hidden':''});
+function cM(){ham.classList.remove('open');mob.classList.remove('open');document.body.style.overflow=''}
+
+/* ── Reveal ── */
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.1});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+
+/* ── Count up ── */
+function countUp(el,target,dur=1600){
+  const t0=performance.now();
+  (function t(now){const prog=Math.min((now-t0)/dur,1);el.textContent=Math.floor((1-Math.pow(1-prog,3))*target);if(prog<1)requestAnimationFrame(t);else el.textContent=target})(t0);
+}
+/* hero stats — fire after loader */
+setTimeout(()=>document.querySelectorAll('.cu').forEach(el=>countUp(el,+el.dataset.t,1800)),1600);
+/* metrics section */
+const mObs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.ce').forEach(el=>countUp(el,+el.dataset.t));mObs.unobserve(e.target)}}),{threshold:.35});
+const ms=document.getElementById('metrics');if(ms)mObs.observe(ms);
+</script>
+</body>
+</html>
